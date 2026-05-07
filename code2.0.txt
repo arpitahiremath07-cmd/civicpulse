@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RoadSense AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(circle at top, #1e3a8a, #0f172a);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+.header {
+  position: sticky;
+  top: 0;
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(12px);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header div {
+  font-weight: 700;
+}
+
+.header p {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.nav button {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  margin-left: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.nav button:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+/* TABS */
+.tab { display: none; padding: 30px 15px; }
+.active { display: block; }
+
+.container { max-width: 900px; margin: auto; }
+
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 25px;
+  border-radius: 16px;
+}
+
+/* INPUTS */
+select, input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+/* BUTTON */
+button.main {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* CANVAS */
+canvas {
+  width: 100%;
+  border-radius: 12px;
+  display: none;
+}
+
+/* LOADER */
+.loader {
+  margin: 20px auto;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid #22c55e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* BAR */
+.bar {
+  width: 100%;
+  height: 14px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+  transition: 1s;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 25px;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* ── AUTH OVERLAY ── */
+#authOverlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #1e3a8a, #0f172a);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-box {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+}
+
+.auth-logo {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.auth-sub {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 28px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  width: auto;
+}
+
+.auth-tabs button.auth-active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border-color: transparent;
+}
+
+.auth-form { display: none; }
+.auth-form.auth-active { display: block; }
+
+.auth-form label {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  margin-top: 14px;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.07);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.auth-form input:focus {
+  border-color: #22c55e;
+}
+
+.auth-form input::placeholder { color: #475569; }
+
+.auth-submit {
+  margin-top: 22px;
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.2s;
+}
+
+.auth-submit:hover { opacity: 0.9; }
+
+.auth-msg {
+  margin-top: 14px;
+  font-size: 13px;
+  text-align: center;
+  min-height: 20px;
+}
+
+.auth-msg.error { color: #f87171; }
+.auth-msg.success { color: #4ade80; }
+
+/* user chip in header */
+#userChip {
+  display: none;
+  font-size: 13px;
+  color: #4ade80;
+  margin-left: 12px;
+  font-weight: 600;
+}
+
+#logoutBtn {
+  display: none;
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #f87171;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+#logoutBtn:hover { background: rgba(239,68,68,0.3); }
+
+/* ── TRAFFIC MANAGEMENT ── */
+.tm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.tm-stat {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.tm-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--tm-color, #22c55e);
+}
+
+.tm-stat-icon { font-size: 28px; margin-bottom: 8px; }
+.tm-stat-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+.tm-stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.signal-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+
+@media(max-width:600px){ .signal-board { grid-template-columns: repeat(2,1fr); } }
+
+.signal-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  user-select: none;
+}
+
+.signal-card:hover { background: rgba(255,255,255,0.09); transform: translateY(-2px); }
+
+.signal-name {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.signal-light {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  background: #1e293b;
+  border: 3px solid rgba(255,255,255,0.1);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.signal-light.red    { background: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,0.7); }
+.signal-light.yellow { background: #eab308; box-shadow: 0 0 14px rgba(234,179,8,0.7); }
+.signal-light.green  { background: #22c55e; box-shadow: 0 0 14px rgba(34,197,94,0.7); }
+
+.signal-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.signal-status.red    { background: rgba(239,68,68,0.15);  color: #f87171; }
+.signal-status.yellow { background: rgba(234,179,8,0.15);  color: #fbbf24; }
+.signal-status.green  { background: rgba(34,197,94,0.15);  color: #4ade80; }
+.signal-status.off    { background: rgba(148,163,184,0.1); color: #94a3b8; }
+
+.signal-timer {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+  color: white;
+}
+
+.lane-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.lane-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #94a3b8;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.lane-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+
+.lane-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lane-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.8s ease;
+}
+
+.badge-low    { background: rgba(34,197,94,0.15);  color: #4ade80;  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight:600; }
+.badge-medium { background: rgba(234,179,8,0.15);  color: #fbbf24;  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight:600; }
+.badge-high   { background: rgba(239,68,68,0.15);  color: #f87171;  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight:600; }
+
+.tm-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.tm-btn {
+  padding: 9px 18px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  width: auto;
+}
+
+.tm-btn:hover { background: rgba(255,255,255,0.12); }
+.tm-btn.active { background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; }
+
+.incident-list { margin-top: 8px; }
+
+.incident-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.incident-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.incident-dot.high   { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+.incident-dot.medium { background: #eab308; box-shadow: 0 0 6px rgba(234,179,8,0.5); }
+.incident-dot.low    { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+
+.incident-info { flex: 1; }
+.incident-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.incident-meta  { font-size: 11px; color: #94a3b8; }
+
+.incident-time {
+  font-size: 11px;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.tm-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: #64748b;
+  margin: 22px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tm-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+.speed-gauge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.speed-gauge {
+  position: relative;
+  width: 90px; height: 90px;
+  flex-shrink: 0;
+}
+
+.speed-gauge svg { width: 100%; height: 100%; }
+.speed-gauge .speed-val {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+.speed-gauge .speed-unit { font-size: 9px; color: #94a3b8; }
+
+.congestion-map {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.cmap-cell {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  transition: background 0.5s;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ── AUTH OVERLAY ── -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">🚧 RoadSense AI</div>
+    <div class="auth-sub">Smart Road Monitoring — Sign in to continue</div>
+
+    <div class="auth-tabs">
+      <button class="auth-active" onclick="switchAuth('login')">Login</button>
+      <button onclick="switchAuth('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginForm" class="auth-form auth-active">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+      <button class="auth-submit" onclick="doLogin()">Login</button>
+      <div class="auth-msg" id="loginMsg"></div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signupForm" class="auth-form">
+      <label>Full Name</label>
+      <input type="text" id="signupName" placeholder="Your full name">
+      <label>Email</label>
+      <input type="email" id="signupEmail" placeholder="you@example.com">
+      <label>Password</label>
+      <input type="password" id="signupPass" placeholder="Min 6 characters">
+      <label>Confirm Password</label>
+      <input type="password" id="signupPass2" placeholder="Repeat password">
+      <button class="auth-submit" onclick="doSignup()">Create Account</button>
+      <div class="auth-msg" id="signupMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>🚧 RoadSense AI</div>
+    <div class="nav">
+      <button onclick="openTab('home')">Home</button>
+      <button onclick="openTab('detect')">Detect</button>
+      <button onclick="openTab('results')">Results</button>
+      <button onclick="openTab('location')">Location</button>
+      <button onclick="openTab('traffic-mgmt')">🚦 Traffic</button>
+      <span id="userChip"></span>
+      <button id="logoutBtn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <p>
+    RoadSense AI is an intelligent road monitoring system designed to detect potholes, traffic issues, signal failures, and road blockages using image-based analysis. It aims to improve road safety and help citizens report civic issues efficiently.
+  </p>
+</div>
+
+<!-- HOME -->
+<div id="home" class="tab active">
+  <div class="container">
+    <div class="card">
+      <h2>Smart Road Monitoring System</h2>
+      <p>
+        This platform uses smart visual analysis techniques to identify road-related problems.
+        It helps users detect infrastructure issues like potholes, traffic congestion, faulty signals,
+        and blocked roads, making reporting faster and more effective.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- DETECT -->
+<div id="detect" class="tab">
+  <div class="container">
+    <div class="card">
+      <h3>Upload Image for Detection</h3>
+
+      <p>
+        Select the type of issue you want to analyze and upload a clear road image.
+        The system will process the image and estimate severity based on visual patterns.
+      </p>
+
+      <select id="issueType">
+        <option value="pothole">Pothole</option>
+        <option value="streetlight">Street Light</option>
+        <option value="traffic">Traffic Density</option>
+        <option value="signal">Signal Issue</option>
+        <option value="roadblock">Road Block</option>
+      </select>
+
+      <input type="file" id="imageInput" accept="image/*">
+
+      <button class="main" onclick="previewImage()">Preview Image</button>
+      <button class="main" onclick="analyzeImage()">Analyze</button>
+
+      <div class="loader" id="loader"></div>
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="tab">
+  <div class="container">
+    <div class="card">
+      <h3>Analysis Results Overview</h3>
+
+      <p>
+        The system has processed your uploaded image and generated an estimated evaluation
+        based on brightness, pixel density, and structural variation in the road surface.
+      </p>
+
+      <p id="textResult">No analysis performed yet.</p>
+
+      <p><b>Severity Level:</b> <span id="severityText">-</span></p>
+      <p><b>Risk Assessment:</b> <span id="riskText">-</span></p>
+
+      <div class="bar">
+        <div class="fill" id="fill"></div>
+      </div>
+
+      <button class="main" onclick="sendReport()">Send WhatsApp Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOCATION -->
+<div id="location" class="tab">
+  <div class="container">
+    <div class="card">
+      <h3>Location Tracking System</h3>
+
+      <p>
+        This feature detects your current geographic location using GPS and converts it into a readable address.
+        It helps authorities understand where the issue has been reported.
+      </p>
+
+      <!-- Real-time clock -->
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px;margin:14px 0;text-align:center;">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase;">Current Date &amp; Time</div>
+        <div id="realtimeClock" style="font-size:28px;font-weight:700;letter-spacing:3px;color:#22c55e;font-variant-numeric:tabular-nums;">--:--:--</div>
+        <div id="realtimeDate" style="font-size:13px;color:#cbd5e1;margin-top:4px;">---</div>
+      </div>
+
+      <div id="gpsBadge" style="display:inline-block;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.3);color:#eab308;border-radius:8px;padding:5px 12px;font-size:12px;margin-bottom:14px;">
+        📡 GPS not enabled
+      </div>
+
+      <p id="coords" style="font-size:13px;color:#cbd5e1;">Coordinates: not detected yet.</p>
+      <p id="address" style="font-size:13px;color:#cbd5e1;line-height:1.6;">Address: Please enable GPS to fetch full address details.</p>
+
+      <button class="main" id="gpsBtn" onclick="getLocation()">📍 Enable GPS &amp; Get Location</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRAFFIC MANAGEMENT -->
+<div id="traffic-mgmt" class="tab">
+  <div class="container">
+
+    <!-- Live Stats Row -->
+    <div class="tm-grid">
+      <div class="tm-stat" style="--tm-color:#ef4444">
+        <div class="tm-stat-icon">🚗</div>
+        <div class="tm-stat-val" id="tm-vehicles">0</div>
+        <div class="tm-stat-label">Vehicles / min</div>
+      </div>
+      <div class="tm-stat" style="--tm-color:#eab308">
+        <div class="tm-stat-icon">⏱️</div>
+        <div class="tm-stat-val" id="tm-wait">0s</div>
+        <div class="tm-stat-label">Avg Wait Time</div>
+      </div>
+      <div class="tm-stat" style="--tm-color:#22c55e">
+        <div class="tm-stat-icon">🛣️</div>
+        <div class="tm-stat-val" id="tm-speed">0</div>
+        <div class="tm-stat-label">Avg Speed (km/h)</div>
+      </div>
+      <div class="tm-stat" style="--tm-color:#3b82f6">
+        <div class="tm-stat-icon">🔴</div>
+        <div class="tm-stat-val" id="tm-incidents">0</div>
+        <div class="tm-stat-label">Active Incidents</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="tm-controls">
+      <button class="tm-btn active" id="btn-live" onclick="tmSetMode('live')">🟢 Live Monitor</button>
+      <button class="tm-btn" id="btn-pause" onclick="tmSetMode('pause')">⏸ Pause</button>
+      <button class="tm-btn" id="btn-reset" onclick="tmReset()">🔄 Reset</button>
+      <button class="tm-btn" id="btn-emergency" onclick="tmEmergency()" style="border-color:rgba(239,68,68,0.4);color:#f87171">🚨 Emergency Mode</button>
+    </div>
+
+    <!-- Signal Board -->
+    <div class="tm-section-title">Traffic Signal Control</div>
+    <div class="signal-board">
+      <div class="signal-card" onclick="tmCycleSignal(0)">
+        <div class="signal-name">Junction A</div>
+        <div class="signal-light" id="sig-0-light"></div>
+        <div class="signal-status" id="sig-0-status">—</div>
+        <div class="signal-timer" id="sig-0-timer">—</div>
+      </div>
+      <div class="signal-card" onclick="tmCycleSignal(1)">
+        <div class="signal-name">Junction B</div>
+        <div class="signal-light" id="sig-1-light"></div>
+        <div class="signal-status" id="sig-1-status">—</div>
+        <div class="signal-timer" id="sig-1-timer">—</div>
+      </div>
+      <div class="signal-card" onclick="tmCycleSignal(2)">
+        <div class="signal-name">Junction C</div>
+        <div class="signal-light" id="sig-2-light"></div>
+        <div class="signal-status" id="sig-2-status">—</div>
+        <div class="signal-timer" id="sig-2-timer">—</div>
+      </div>
+      <div class="signal-card" onclick="tmCycleSignal(3)">
+        <div class="signal-name">Junction D</div>
+        <div class="signal-light" id="sig-3-light"></div>
+        <div class="signal-status" id="sig-3-status">—</div>
+        <div class="signal-timer" id="sig-3-timer">—</div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:#475569;margin-top:4px;">💡 Click any junction to manually cycle its signal</p>
+
+    <!-- Lane Congestion -->
+    <div class="tm-section-title">Lane Congestion Monitor</div>
+    <div class="card" style="padding:16px">
+      <table class="lane-table">
+        <thead>
+          <tr>
+            <th>Lane</th>
+            <th>Density</th>
+            <th>Load</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="lane-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Speed + Congestion Map row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+
+      <!-- Speed Gauge -->
+      <div class="card" style="padding:18px">
+        <div class="tm-section-title" style="margin-top:0">Avg Speed</div>
+        <div class="speed-gauge-wrap">
+          <div class="speed-gauge">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="url(#spGrad)" stroke-width="10"
+                stroke-dasharray="264" id="speed-arc" stroke-dashoffset="264"
+                stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <defs>
+                <linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#22c55e"/>
+                  <stop offset="50%" stop-color="#eab308"/>
+                  <stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="speed-val">
+              <span id="gauge-val">0</span>
+              <span class="speed-unit">km/h</span>
+            </div>
+          </div>
+          <div>
+            <p style="font-size:13px;color:#cbd5e1;margin:0 0 6px">Free flow: <b style="color:#4ade80">50 km/h</b></p>
+            <p style="font-size:13px;color:#cbd5e1;margin:0 0 6px">Congested: <b style="color:#f87171">&lt;15 km/h</b></p>
+            <p style="font-size:12px;color:#64748b;margin:0" id="speed-label">Calculating…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heat Map -->
+      <div class="card" style="padding:18px">
+        <div class="tm-section-title" style="margin-top:0">Congestion Map</div>
+        <div class="congestion-map" id="cmap"></div>
+        <p style="font-size:11px;color:#475569;margin-top:8px">🟢 Free &nbsp; 🟡 Slow &nbsp; 🔴 Jammed</p>
+      </div>
+    </div>
+
+    <!-- Incident Log -->
+    <div class="tm-section-title">Incident Log</div>
+    <div class="card" style="padding:16px 20px">
+      <div class="incident-list" id="incident-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>
+    © 2026 RoadSense AI. All rights reserved.<br>
+    Built to improve road safety, urban infrastructure monitoring, and smart city reporting systems.<br>
+    This system is designed for educational and civic improvement purposes.
+  </p>
+</div>
+
+<script>
+
+/* ── ORIGINAL CODE (unchanged) ── */
+
+let lastIssue="", lastValue="", lastSeverity="", validDetection=false;
+
+function openTab(id){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id === 'traffic-mgmt' && !TM.timer) tmInit();
+}
+
+function previewImage(){
+  const file=document.getElementById("imageInput").files[0];
+  if(!file) return alert("Please select an image file first.");
+
+  const img=new Image();
+  const url=URL.createObjectURL(file);
+  img.src=url;
+
+  img.onload=()=>{
+    const canvas=document.getElementById("canvas");
+    const ctx=canvas.getContext("2d");
+
+    // Scale down large images to fit screen width (max 860px)
+    const maxW=860;
+    let w=img.width, h=img.height;
+    if(w>maxW){ h=Math.round(h*(maxW/w)); w=maxW; }
+
+    canvas.width=w;
+    canvas.height=h;
+    canvas.style.display="block";
+    canvas.style.marginTop="16px";
+    ctx.drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+  };
+
+  img.onerror=()=>alert("Could not load image. Please try a different file.");
+}
+
+function analyzeImage(){
+  const file=document.getElementById("imageInput").files[0];
+  if(!file) return alert("Please select an image file first.");
+
+  const canvas=document.getElementById("canvas");
+  const ctx=canvas.getContext("2d");
+
+  function runAnalysis(){
+    const issue=document.getElementById("issueType").value;
+    document.getElementById("loader").style.display="block";
+
+    setTimeout(()=>{
+      document.getElementById("loader").style.display="none";
+
+      const totalPx=canvas.width*canvas.height;
+      const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+
+      /* ── DARK / LIGHT PIXEL ENGINE ──
+         For every pixel compute luminance (perceptual weight).
+         Bucket into: very dark (<50), dark (50–100), mid (100–155),
+         light (155–210), very light (>210).                         */
+      let veryDark=0, dark=0, mid=0, light=0, veryLight=0, totalLum=0;
+
+      for(let i=0;i<data.length;i+=4){
+        // Perceptual luminance (ITU-R BT.709)
+        const lum=data[i]*0.2126 + data[i+1]*0.7152 + data[i+2]*0.0722;
+        totalLum+=lum;
+        if(lum<50)       veryDark++;
+        else if(lum<100) dark++;
+        else if(lum<155) mid++;
+        else if(lum<210) light++;
+        else             veryLight++;
+      }
+
+      const avgLum=totalLum/totalPx;
+      const darkRatio=(veryDark+dark)/totalPx;      // 0–1
+      const lightRatio=(light+veryLight)/totalPx;   // 0–1
+      const veryDarkRatio=veryDark/totalPx;
+      const veryLightRatio=veryLight/totalPx;
+      const contrast=Math.abs(darkRatio-lightRatio); // higher = more varied surface
+
+      /* ── Store pixel stats for results display ── */
+      window._pixelStats={
+        avgLum:avgLum.toFixed(1),
+        darkPct:(darkRatio*100).toFixed(1),
+        lightPct:(lightRatio*100).toFixed(1),
+        veryDarkPct:(veryDarkRatio*100).toFixed(1),
+        veryLightPct:(veryLightRatio*100).toFixed(1),
+        contrast:(contrast*100).toFixed(1),
+        totalPx
+      };
+
+      /* ── Minimum signal check: image must have some variation ── */
+      if(darkRatio<0.01 && lightRatio<0.01){
+        validDetection=false;
+        document.getElementById("textResult").innerHTML=
+          "<span style='color:#f87171'>⚠️ Image too uniform — upload a real road photo.</span>";
+        openTab("results");
+        return;
+      }
+
+      validDetection=true;
+
+      /* ── Issue-specific dark/light logic ── */
+
+      if(issue==="pothole"){
+        /* Potholes = clusters of very dark pixels (shadows / depressions).
+           More very-dark pixels → deeper/bigger pothole.              */
+        const score=veryDarkRatio*100;               // 0–100
+        const depth=(Math.sqrt(veryDarkRatio)*65).toFixed(1);
+        lastIssue="Pothole";
+        lastValue=`Depth est. ~${depth} cm  |  Dark pixel coverage: ${(veryDarkRatio*100).toFixed(1)}%`;
+        lastSeverity=score<5?"Low":score<18?"Medium":"High";
+        show(score*2);
+
+      } else if(issue==="streetlight"){
+        /* Working lights → bright hotspots (very light pixels).
+           Many very-light pixels = lights on and working.
+           Few very-light pixels = lights off / damaged.               */
+        const score=veryLightRatio*100;
+        lastIssue="Street Light";
+        lastValue=`Bright pixel coverage: ${score.toFixed(1)}%  |  Avg luminance: ${avgLum.toFixed(0)}`;
+        const status=score>15?"Operational":score>5?"Partial failure":"Not working / Off";
+        lastSeverity=score>15?"Low":score>5?"Moderate":"Critical";
+        window._pixelStats.extraNote=`Status: ${status}`;
+        show(score>15?20:score>5?55:90);
+
+      } else if(issue==="traffic"){
+        /* Heavy traffic = many dark (vehicle) pixels against lighter road.
+           High dark ratio + low average luminance = congested.        */
+        const density=darkRatio*100;
+        lastIssue="Traffic Density";
+        lastValue=`Vehicle/dark coverage: ${density.toFixed(1)}%  |  Avg luminance: ${avgLum.toFixed(0)}`;
+        lastSeverity=density<30?"Low":density<55?"Medium":"High";
+        show(density);
+
+      } else if(issue==="signal"){
+        /* Signal lights appear as bright coloured spots.
+           High very-light ratio + low average = lights visible.       */
+        const hasSignal=veryLightRatio>0.02 || avgLum>100;
+        lastIssue="Signal Issue";
+        lastValue=`Bright spot ratio: ${(veryLightRatio*100).toFixed(1)}%  |  Avg lum: ${avgLum.toFixed(0)}`;
+        lastSeverity=hasSignal?"Low":"High";
+        window._pixelStats.extraNote=`Signal detected: ${hasSignal?"Yes ✅":"No ❌"}`;
+        show(hasSignal?15:85);
+
+      } else if(issue==="roadblock"){
+        /* Blockages = large dark or very-dark mass in frame.
+           High combined dark pixel ratio = obstructed road.           */
+        const block=(veryDarkRatio+dark/totalPx)*100;
+        lastIssue="Road Block";
+        lastValue=`Obstruction coverage: ${block.toFixed(1)}%  |  Contrast: ${(contrast*100).toFixed(1)}%`;
+        lastSeverity=block<20?"Low":block<45?"Medium":"High";
+        show(block);
+      }
+
+      openTab("results");
+    },1000);
+  }
+
+  // If canvas already has image data run directly, else load first
+  if(canvas.width>0 && canvas.style.display!=="none"){
+    runAnalysis();
+  } else {
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.src=url;
+    img.onload=()=>{
+      const maxW=860;
+      let w=img.width, h=img.height;
+      if(w>maxW){ h=Math.round(h*(maxW/w)); w=maxW; }
+      canvas.width=w; canvas.height=h;
+      canvas.style.display="block";
+      canvas.style.marginTop="16px";
+      ctx.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      runAnalysis();
+    };
+    img.onerror=()=>alert("Could not load image.");
+  }
+}
+
+function show(val){
+  const s=window._pixelStats||{};
+  const extra=s.extraNote?`<br><b>Note:</b> ${s.extraNote}`:"";
+
+  document.getElementById("textResult").innerHTML=
+    `Analysis complete ✅<br>
+     <small style="color:#94a3b8">
+       Avg luminance: <b>${s.avgLum}</b> / 255 &nbsp;|&nbsp;
+       Dark pixels: <b>${s.darkPct}%</b> &nbsp;|&nbsp;
+       Light pixels: <b>${s.lightPct}%</b> &nbsp;|&nbsp;
+       Very dark: <b>${s.veryDarkPct}%</b> &nbsp;|&nbsp;
+       Very light: <b>${s.veryLightPct}%</b> &nbsp;|&nbsp;
+       Contrast index: <b>${s.contrast}%</b>
+       ${extra}
+     </small>`;
+
+  document.getElementById("severityText").innerText=lastSeverity;
+
+  const risk=lastSeverity==="Low"||lastSeverity==="Minor"  ?"🟢 Safe":
+             lastSeverity==="Medium"||lastSeverity==="Moderate"?"🟡 Caution":"🔴 Danger";
+
+  document.getElementById("riskText").innerText=risk;
+  document.getElementById("fill").style.width=Math.min(val,100)+"%";
+}
+
+function sendReport(){
+  if(!validDetection) return alert("No valid analysis to report. Analyze an image first.");
+
+  const num="918217327078";   // destination number
+
+  const now=new Date();
+  const timestamp=now.toLocaleString("en-IN",{
+    day:"2-digit",month:"short",year:"numeric",
+    hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true
+  });
+
+  const s=window._pixelStats||{};
+  let locLine="📍 Location: Not captured";
+  if(window._gpsLat&&window._gpsLon){
+    locLine=`📍 Coordinates: ${window._gpsLat.toFixed(6)}, ${window._gpsLon.toFixed(6)}`;
+    if(window._gpsAddress) locLine+=`\n📌 Address: ${window._gpsAddress}`;
+  }
+
+  const msg=
+`🚧 *RoadSense AI — Issue Report*
+━━━━━━━━━━━━━━━━━━━━
+🔍 *Issue Type:*  ${lastIssue}
+📊 *Detected Value:*  ${lastValue}
+⚠️ *Severity:*  ${lastSeverity}
+🕐 *Reported At:*  ${timestamp}
+━━━━━━━━━━━━━━━━━━━━
+📸 *Pixel Analysis*
+  • Avg Luminance: ${s.avgLum}/255
+  • Dark Pixels:   ${s.darkPct}%
+  • Light Pixels:  ${s.lightPct}%
+  • Very Dark:     ${s.veryDarkPct}%
+  • Very Light:    ${s.veryLightPct}%
+  • Contrast:      ${s.contrast}%
+━━━━━━━━━━━━━━━━━━━━
+${locLine}
+━━━━━━━━━━━━━━━━━━━━
+_Generated by RoadSense AI_`;
+
+  /* Open direct WhatsApp chat with pre-filled message */
+  const waURL=`https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+  window.open(waURL,"_blank","noopener,noreferrer");
+}
+
+/* ══════════════════════════════════════
+   TRAFFIC MANAGEMENT SYSTEM
+══════════════════════════════════════ */
+
+const TM = {
+  mode: 'live',        // 'live' | 'pause' | 'emergency'
+  tick: 0,
+  timer: null,
+
+  // Signal states: 'red' | 'yellow' | 'green'
+  signals: [
+    { state: 'green',  countdown: 28 },
+    { state: 'red',    countdown: 18 },
+    { state: 'yellow', countdown: 5  },
+    { state: 'red',    countdown: 32 },
+  ],
+
+  // Lanes
+  lanes: [
+    { name: 'Lane 1 — North', density: 35 },
+    { name: 'Lane 2 — South', density: 72 },
+    { name: 'Lane 3 — East',  density: 18 },
+    { name: 'Lane 4 — West',  density: 55 },
+  ],
+
+  // Congestion map (5×5 = 25 cells)
+  cmap: Array(25).fill(0).map(()=>Math.random()),
+
+  // Live counters
+  vehicles: 0,
+  wait: 0,
+  speed: 0,
+  incidents: 0,
+
+  // Incident log
+  log: []
+};
+
+const INCIDENT_POOL = [
+  { title: 'Heavy congestion — Junction B', sev: 'high' },
+  { title: 'Stalled vehicle — Lane 2 South', sev: 'medium' },
+  { title: 'Signal fault — Junction C', sev: 'high' },
+  { title: 'Minor fender bender — Lane 1 North', sev: 'medium' },
+  { title: 'Road work ahead — Lane 3 East', sev: 'low' },
+  { title: 'Debris on road — Junction D', sev: 'medium' },
+  { title: 'Pedestrian crossing delay — Junction A', sev: 'low' },
+  { title: 'Emergency vehicle passage — All lanes', sev: 'high' },
+];
+
+function tmInit(){
+  // Build congestion map cells
+  const cmap = document.getElementById('cmap');
+  cmap.innerHTML = '';
+  for(let i=0;i<25;i++){
+    const cell = document.createElement('div');
+    cell.className = 'cmap-cell';
+    cell.id = 'cmap-'+i;
+    cmap.appendChild(cell);
+  }
+
+  // Build lane table rows
+  const tbody = document.getElementById('lane-tbody');
+  tbody.innerHTML = '';
+  TM.lanes.forEach((lane, i)=>{
+    const tr = document.createElement('tr');
+    tr.id = 'lane-row-'+i;
+    tr.innerHTML = `
+      <td style="font-weight:600;font-size:13px">${lane.name}</td>
+      <td style="width:120px">
+        <div class="lane-bar-wrap">
+          <div class="lane-bar-fill" id="lane-bar-${i}" style="width:0%"></div>
+        </div>
+      </td>
+      <td style="font-size:13px;font-variant-numeric:tabular-nums" id="lane-pct-${i}">0%</td>
+      <td id="lane-badge-${i}"></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Seed initial incidents
+  tmAddIncident(INCIDENT_POOL[0]);
+  tmAddIncident(INCIDENT_POOL[1]);
+
+  tmRenderAll();
+  TM.timer = setInterval(tmTick, 1000);
+}
+
+function tmTick(){
+  if(TM.mode !== 'live') return;
+  TM.tick++;
+
+  // Countdown signals
+  TM.signals.forEach((sig, i)=>{
+    sig.countdown--;
+    if(sig.countdown <= 0){
+      // Cycle: green→yellow→red→green
+      if(sig.state === 'green')       { sig.state = 'yellow'; sig.countdown = 4; }
+      else if(sig.state === 'yellow') { sig.state = 'red';    sig.countdown = Math.round(20+Math.random()*20); }
+      else                            { sig.state = 'green';  sig.countdown = Math.round(20+Math.random()*20); }
+    }
+  });
+
+  // Fluctuate lane densities
+  TM.lanes.forEach(lane=>{
+    lane.density = Math.min(100, Math.max(5, lane.density + (Math.random()*10-5)));
+  });
+
+  // Fluctuate congestion map
+  TM.cmap = TM.cmap.map(v=> Math.min(1, Math.max(0, v + (Math.random()*0.15-0.07))));
+
+  // Update live stats
+  const avgDensity = TM.lanes.reduce((a,l)=>a+l.density,0)/TM.lanes.length;
+  TM.vehicles = Math.round(30 + avgDensity * 1.2 + Math.random()*8);
+  TM.wait     = Math.round(10 + avgDensity * 0.8);
+  TM.speed    = Math.round(Math.max(5, 60 - avgDensity * 0.55 + Math.random()*5));
+  TM.incidents = TM.log.length;
+
+  // Random incident ~ every 30s
+  if(TM.tick % 30 === 0 && Math.random() > 0.4){
+    tmAddIncident(INCIDENT_POOL[Math.floor(Math.random()*INCIDENT_POOL.length)]);
+  }
+
+  tmRenderAll();
+}
+
+function tmRenderAll(){
+  // Stats
+  document.getElementById('tm-vehicles').textContent = TM.vehicles;
+  document.getElementById('tm-wait').textContent     = TM.wait + 's';
+  document.getElementById('tm-speed').textContent    = TM.speed;
+  document.getElementById('tm-incidents').textContent= TM.incidents;
+
+  // Signals
+  TM.signals.forEach((sig,i)=>{
+    const light  = document.getElementById('sig-'+i+'-light');
+    const status = document.getElementById('sig-'+i+'-status');
+    const timer  = document.getElementById('sig-'+i+'-timer');
+    light.className  = 'signal-light ' + sig.state;
+    status.className = 'signal-status ' + sig.state;
+    status.textContent = sig.state.toUpperCase();
+    timer.textContent  = sig.countdown + 's';
+  });
+
+  // Lanes
+  TM.lanes.forEach((lane,i)=>{
+    const pct = Math.round(lane.density);
+    const bar  = document.getElementById('lane-bar-'+i);
+    const pctEl= document.getElementById('lane-pct-'+i);
+    const badge= document.getElementById('lane-badge-'+i);
+
+    let color = pct < 40 ? '#22c55e' : pct < 70 ? '#eab308' : '#ef4444';
+    bar.style.width     = pct + '%';
+    bar.style.background= color;
+    pctEl.textContent   = pct + '%';
+
+    if(pct < 40)       badge.innerHTML = '<span class="badge-low">Free</span>';
+    else if(pct < 70)  badge.innerHTML = '<span class="badge-medium">Slow</span>';
+    else               badge.innerHTML = '<span class="badge-high">Jammed</span>';
+  });
+
+  // Congestion map
+  TM.cmap.forEach((v,i)=>{
+    const cell = document.getElementById('cmap-'+i);
+    if(!cell) return;
+    if(v < 0.35)      cell.style.background = 'rgba(34,197,94,0.6)';
+    else if(v < 0.65) cell.style.background = 'rgba(234,179,8,0.6)';
+    else              cell.style.background = 'rgba(239,68,68,0.7)';
+  });
+
+  // Speed arc
+  const maxSpeed = 60;
+  const arc = document.getElementById('speed-arc');
+  const gaugeVal = document.getElementById('gauge-val');
+  const speedLabel = document.getElementById('speed-label');
+  if(arc){
+    const fraction = Math.min(TM.speed / maxSpeed, 1);
+    arc.style.strokeDashoffset = 264 - fraction * 264;
+    gaugeVal.textContent = TM.speed;
+    speedLabel.textContent = TM.speed >= 40 ? '✅ Free Flow'
+                           : TM.speed >= 20 ? '🟡 Slow Moving'
+                           : '🔴 Heavy Jam';
+  }
+}
+
+function tmSetMode(mode){
+  TM.mode = mode;
+  document.getElementById('btn-live').classList.toggle('active', mode==='live');
+  document.getElementById('btn-pause').classList.toggle('active', mode==='pause');
+}
+
+function tmReset(){
+  TM.tick = 0;
+  TM.log  = [];
+  TM.signals.forEach((s,i)=>{
+    s.state='red'; s.countdown=Math.round(10+i*8);
+  });
+  TM.lanes.forEach(l=>{ l.density=Math.round(20+Math.random()*40); });
+  TM.cmap = Array(25).fill(0).map(()=>Math.random()*0.4);
+  document.getElementById('incident-list').innerHTML='<p style="font-size:13px;color:#475569">No incidents recorded.</p>';
+  tmRenderAll();
+}
+
+function tmEmergency(){
+  TM.mode = 'live';
+  // Force all signals red
+  TM.signals.forEach(s=>{ s.state='red'; s.countdown=60; });
+  TM.lanes.forEach(l=>{ l.density=95; });
+  tmAddIncident({ title:'🚨 EMERGENCY MODE ACTIVATED — All signals held red', sev:'high' });
+  tmRenderAll();
+  document.getElementById('btn-live').classList.add('active');
+  document.getElementById('btn-pause').classList.remove('active');
+  alert('🚨 Emergency mode activated!\nAll signals set to RED. Clear the road.');
+}
+
+function tmCycleSignal(i){
+  const sig = TM.signals[i];
+  if(sig.state==='red')    { sig.state='green';  sig.countdown=20; }
+  else if(sig.state==='green') { sig.state='yellow'; sig.countdown=4; }
+  else                     { sig.state='red';    sig.countdown=20; }
+  tmRenderAll();
+}
+
+function tmAddIncident(incident){
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0')+':'+
+                  now.getMinutes().toString().padStart(2,'0')+':'+
+                  now.getSeconds().toString().padStart(2,'0');
+  TM.log.unshift({ ...incident, time: timeStr });
+  if(TM.log.length > 8) TM.log.pop();
+
+  // Re-render incident list
+  const list = document.getElementById('incident-list');
+  if(!list) return;
+  list.innerHTML = TM.log.map(inc=>`
+    <div class="incident-item">
+      <div class="incident-dot ${inc.sev}"></div>
+      <div class="incident-info">
+        <div class="incident-title">${inc.title}</div>
+        <div class="incident-meta">Severity: ${inc.sev.charAt(0).toUpperCase()+inc.sev.slice(1)}</div>
+      </div>
+      <div class="incident-time">${inc.time}</div>
+    </div>`).join('');
+}
+
+
+/* ── REAL-TIME CLOCK ── */
+function updateClock(){
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,"0");
+  const mm=String(now.getMinutes()).padStart(2,"0");
+  const ss=String(now.getSeconds()).padStart(2,"0");
+  const el=document.getElementById("realtimeClock");
+  if(el) el.textContent=`${hh}:${mm}:${ss}`;
+
+  const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const dateEl=document.getElementById("realtimeDate");
+  if(dateEl) dateEl.textContent=
+    `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+function getLocation(){
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    let lat=pos.coords.latitude;
+    let lon=pos.coords.longitude;
+
+    document.getElementById("coords").innerText=`Latitude: ${lat}, Longitude: ${lon}`;
+
+    let res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    let data=await res.json();
+
+    document.getElementById("address").innerText=data.display_name;
+
+    // save for WhatsApp report
+    window._gpsLat=lat;
+    window._gpsLon=lon;
+    window._gpsAddress=data.display_name;
+  });
+}
+
+/* ── AUTH CODE (new) ── */
+
+// Simple in-memory user store (persisted via localStorage)
+function getUsers(){
+  try { return JSON.parse(localStorage.getItem("rs_users")||"{}"); } catch(e){ return {}; }
+}
+function saveUsers(u){ localStorage.setItem("rs_users", JSON.stringify(u)); }
+
+function switchAuth(tab){
+  document.getElementById("loginForm").classList.toggle("auth-active", tab==="login");
+  document.getElementById("signupForm").classList.toggle("auth-active", tab==="signup");
+  document.querySelectorAll(".auth-tabs button").forEach((b,i)=>{
+    b.classList.toggle("auth-active", (i===0&&tab==="login")||(i===1&&tab==="signup"));
+  });
+  document.getElementById("loginMsg").textContent="";
+  document.getElementById("signupMsg").textContent="";
+}
+
+function setMsg(id, text, type){
+  const el=document.getElementById(id);
+  el.textContent=text;
+  el.className="auth-msg "+(type||"");
+}
+
+function doSignup(){
+  const name=document.getElementById("signupName").value.trim();
+  const email=document.getElementById("signupEmail").value.trim().toLowerCase();
+  const pass=document.getElementById("signupPass").value;
+  const pass2=document.getElementById("signupPass2").value;
+
+  if(!name||!email||!pass||!pass2) return setMsg("signupMsg","All fields are required.","error");
+  if(!/\S+@\S+\.\S+/.test(email)) return setMsg("signupMsg","Enter a valid email.","error");
+  if(pass.length<6) return setMsg("signupMsg","Password must be at least 6 characters.","error");
+  if(pass!==pass2) return setMsg("signupMsg","Passwords do not match.","error");
+
+  const users=getUsers();
+  if(users[email]) return setMsg("signupMsg","Account already exists. Please login.","error");
+
+  users[email]={name, pass};
+  saveUsers(users);
+  setMsg("signupMsg","Account created! Switching to login…","success");
+  setTimeout(()=>switchAuth("login"),1200);
+}
+
+function doLogin(){
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const pass=document.getElementById("loginPass").value;
+
+  if(!email||!pass) return setMsg("loginMsg","Please enter email and password.","error");
+
+  const users=getUsers();
+  if(!users[email]||users[email].pass!==pass) return setMsg("loginMsg","Invalid email or password.","error");
+
+  // Success — hide overlay, show user chip
+  document.getElementById("authOverlay").style.display="none";
+  const chip=document.getElementById("userChip");
+  chip.textContent="👤 "+users[email].name;
+  chip.style.display="inline";
+  document.getElementById("logoutBtn").style.display="inline";
+}
+
+function doLogout(){
+  document.getElementById("authOverlay").style.display="flex";
+  document.getElementById("userChip").style.display="none";
+  document.getElementById("logoutBtn").style.display="none";
+  document.getElementById("loginEmail").value="";
+  document.getElementById("loginPass").value="";
+  setMsg("loginMsg","","");
+  switchAuth("login");
+}
+
+</script>
+
+</body>
+</html>
